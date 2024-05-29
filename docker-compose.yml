@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'nodeTemplateDB'
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+  redis-server:
+    image: bitnami/redis:latest
+    environment:
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      - ALLOW_EMPTY_PASSWORD=false
+      - REDIS_PASSWORD=my-password
+      - REDIS_USERNAME=default
+    volumes:
+      - redis-data:/bitnami/redis/data
+    ports:
+      - '6379:6379'
+  db-testing:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'nodeTemplateDBTesting'
+    ports:
+      - '5433:5432'
+volumes:
+  db:
+  redis-data:

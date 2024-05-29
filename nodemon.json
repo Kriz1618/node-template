@@ -1,0 +1,5 @@
+{
+  "exec": "concurrently \"npm run start-server\" \"npm run start-worker\"",
+  "watch": ["src", "worker"],
+  "ext": "ts,ejs,json"
+}

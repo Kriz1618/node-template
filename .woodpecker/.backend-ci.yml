@@ -1,0 +1,66 @@
+x-common: &common
+  image: 'node:20.9.0'
+  environment:
+    - BASE_URL=http://dummy-server
+    - NODE_ENV=test
+    - PORT=1111
+    - LOG_LEVEL=info
+    - DATABASE_URL=postgres://test_user:password123@postgres-service:5432/nodeTemplateTesting
+    - ACCESS_TOKEN_SECRET=secret
+    - REFRESH_TOKEN_SECRET=secret
+    - ACCESS_TOKEN_EXPIRES_IN=1d
+    - REFRESH_TOKEN_EXPIRES_IN=1d
+    - EMAIL_FROM=test-client
+    - SMTP_USER=test
+    - SMTP_PASSWORD=test
+    - SMTP_HOST=test
+    - SMTP_PORT=1111
+    - APP_NAME=APPNAME
+    - REDIS_HOST=redis-server
+    - REDIS_PASSWORD=my-password
+    - REDIS_PORT=6379
+    - REDIS_USERNAME=default
+    - JOBS_RETENTION_HOURS=24
+    - OTP_EXPIRATION_MINUTES=15
+    - ENABLE_RATE_LIMIT=true
+
+pipeline:
+  setup:
+    <<: *common
+    commands:
+      - npm ci --prefer-offline
+  js-lint:
+    <<: *common
+    group: fe-build
+    commands:
+      - CI=true npm run lint
+  prettier:
+    <<: *common
+    group: fe-build
+    commands:
+      - CI=true npx prettier --check "src/**/*.ts"
+  js-test:
+    <<: *common
+    group: fe-build
+    commands:
+      - sleep 15
+      - CI=true npm run test
+  build:
+    <<: *common
+    group: fe-build
+    commands:
+      - CI=true npm run build
+
+services:
+  redis-server:
+    image: bitnami/redis:latest
+    environment:
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      - ALLOW_EMPTY_PASSWORD=false
+      - REDIS_PASSWORD=my-password
+      - REDIS_USERNAME=default
+  postgres-service:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: password123
